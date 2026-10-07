@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>TUGON AI - Community Disaster and Social Services</title>
+<!-- Font Awesome -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<!-- Tailwind CSS v3 with forms and container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              light: '#38bdf8',
+              DEFAULT: '#0284c7',
+              dark: '#0369a1',
+              accent: '#0066cc'
+            }
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+          },
+          boxShadow: {
+            'glass': '0 20px 45px -10px rgba(0, 40, 85, 0.25), inset 0 1px 1px 0 rgba(255, 255, 255, 0.7)',
+            'pill-btn': '0 10px 22px -4px rgba(2, 115, 204, 0.45), inset 0 1px 1px 0 rgba(255, 255, 255, 0.55)',
+            'pill-btn-hover': '0 14px 28px -4px rgba(2, 115, 204, 0.6), inset 0 1px 1px 0 rgba(255, 255, 255, 0.75)',
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: Custom Glassmorphism and Graphic Styles -->
+<style data-purpose="glass-effects">
+    /* High fidelity frosted glass surface */
+    .glass-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.32) 100%);
+      backdrop-filter: blur(28px) saturate(160%);
+      -webkit-backdrop-filter: blur(28px) saturate(160%);
+      border: 1.5px solid rgba(255, 255, 255, 0.75);
+    }
+
+    /* Ambient glossy button gradient mimicking reference */
+    .btn-glossy-primary {
+      background: linear-gradient(180deg, #1ea2fa 0%, #0377dc 52%, #0260c0 100%);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+    .btn-glossy-primary:active {
+      transform: scale(0.985);
+      background: linear-gradient(180deg, #1b8fdc 0%, #0269c4 100%);
+    }
+
+    /* Blue dimensional text gradient for TUGON AI */
+    .brand-gradient-text {
+      background: linear-gradient(180deg, #028df0 0%, #025bbd 65%, #00459c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0px 1px 1.5px rgba(2, 60, 130, 0.3));
+    }
+  </style>
+  <style data-purpose="network-particles">
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.7; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+    .node-glow {
+      animation: pulseGlow 3.5s infinite ease-in-out;
+    }
+  </style>
+  <style data-purpose="background-image">
+    .bg-scenic {
+      background-image: url('https://images.unsplash.com/photo-1508606572321-901ea5d63f65?auto=format&fit=crop&w=1920&q=80');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+  </style>
+</head>
+<body class="bg-slate-200 antialiased font-sans m-0 p-0 flex items-center justify-center min-h-screen select-none overflow-hidden">
+<!-- BEGIN: MobileDeviceContainer -->
+<main class="relative w-full min-h-screen overflow-hidden shadow-2xl flex flex-col justify-center items-center px-4 py-8 bg-slate-900" data-purpose="viewport">
+
+<!-- BEGIN: BackgroundLayer -->
+<div class="absolute inset-0 pointer-events-none z-0 bg-scenic" data-purpose="scenic-backdrop">
+  <!-- Dark overlay to ensure content readability on photo background -->
+  <div class="absolute inset-0 bg-gradient-to-b from-[#0b1329]/80 via-[#0f172a]/85 to-[#0b1329]/90"></div>
+  <!-- Simulated soft city architectural silhouette & daylight bokeh -->
+  <div class="absolute inset-0 bg-cover bg-center opacity-40 filter blur-[14px] scale-110" style="background-image: radial-gradient(circle at 50% 20%, rgba(255,255,255,0.4) 0%, transparent 60%), linear-gradient(to top, rgba(70,90,95,0.55) 0%, rgba(130,170,200,0.2) 50%, rgba(255,255,255,0) 100%);"></div>
+  <div class="absolute -bottom-10 inset-x-0 h-48 bg-gradient-to-t from-[#2c4038]/50 to-transparent blur-md"></div>
+</div>
+<!-- END: BackgroundLayer -->
+
+<!-- BEGIN: NetworkOverlayLayer -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none z-10" data-purpose="network-lines" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<radialgradient cx="50%" cy="50%" id="cyanFlare" r="50%">
+<stop offset="0%" stop-color="#ffffff" stop-opacity="1"></stop>
+<stop offset="30%" stop-color="#55d4ff" stop-opacity="0.85"></stop>
+<stop offset="65%" stop-color="#0284c7" stop-opacity="0.4"></stop>
+<stop offset="100%" stop-color="#0284c7" stop-opacity="0"></stop>
+</radialgradient>
+<lineargradient id="lineGrad" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="rgba(255,255,255,0.55)"></stop>
+<stop offset="50%" stop-color="rgba(140,215,255,0.4)"></stop>
+<stop offset="100%" stop-color="rgba(255,255,255,0.1)"></stop>
+</lineargradient>
+</defs>
+<line stroke="url(#lineGrad)" stroke-linecap="round" stroke-width="1.2" x1="280" x2="355" y1="110" y2="175"></line>
+<line stroke="url(#lineGrad)" stroke-linecap="round" stroke-width="1.2" x1="355" x2="385" y1="175" y2="330"></line>
+<line opacity="0.6" stroke="url(#lineGrad)" stroke-width="0.8" x1="355" x2="270" y1="175" y2="240"></line>
+<line stroke="url(#lineGrad)" stroke-linecap="round" stroke-width="1.2" x1="385" x2="330" y1="330" y2="460"></line>
+<line stroke="url(#lineGrad)" stroke-linecap="round" stroke-width="1.2" x1="330" x2="365" y1="460" y2="650"></line>
+<line stroke="url(#lineGrad)" stroke-linecap="round" stroke-width="1" x1="365" x2="295" y1="650" y2="760"></line>
+<line stroke="url(#lineGrad)" stroke-linecap="round" stroke-width="1.2" x1="60" x2="30" y1="490" y2="700"></line>
+<line opacity="0.5" stroke="url(#lineGrad)" stroke-width="0.9" x1="60" x2="150" y1="490" y2="610"></line>
+<line opacity="0.6" stroke="url(#lineGrad)" stroke-width="1" x1="60" x2="110" y1="490" y2="400"></line>
+<circle class="node-glow" cx="280" cy="110" fill="#e0f4ff" filter="drop-shadow(0 0 7px #38bdf8)" r="4.5"></circle>
+<circle class="node-glow" cx="355" cy="175" fill="url(#cyanFlare)" r="22"></circle>
+<circle cx="355" cy="175" fill="#ffffff" r="3.5"></circle>
+<circle class="node-glow" cx="385" cy="330" fill="url(#cyanFlare)" r="14" style="animation-delay: 1.2s;"></circle>
+<circle cx="385" cy="330" fill="#ffffff" r="2.8"></circle>
+<circle class="node-glow" cx="60" cy="490" fill="url(#cyanFlare)" r="20" style="animation-delay: 0.6s;"></circle>
+<circle cx="60" cy="490" fill="#ffffff" r="3"></circle>
+<circle class="node-glow" cx="365" cy="650" fill="url(#cyanFlare)" r="22" style="animation-delay: 1.8s;"></circle>
+<circle cx="365" cy="650" fill="#ffffff" r="3"></circle>
+<circle class="node-glow" cx="295" cy="760" fill="url(#cyanFlare)" r="12"></circle>
+</svg>
+<!-- END: NetworkOverlayLayer -->
+
+<!-- BEGIN: GlassmorphismCard -->
+  <section class="glass-card relative z-20 w-full max-w-[760px] rounded-[36px] px-10 py-12 sm:px-14 sm:py-14 flex flex-col items-center justify-between shadow-glass text-center transition-all duration-300 min-h-[660px]" data-purpose="primary-interface-card">
+  <div class="absolute -top-2 -right-2 w-32 h-32 bg-white/30 rounded-full blur-2xl pointer-events-none"></div>
+  <div class="absolute -bottom-3 -left-3 w-40 h-40 bg-cyan-200/25 rounded-full blur-2xl pointer-events-none"></div>
+
+  <!-- Top & Brand Section -->
+  <div class="w-full flex flex-col items-center flex-1 justify-center pt-2">
+    <!-- BEGIN: CompassBadge -->
+    <div class="relative w-48 h-48 mb-7 flex items-center justify-center filter drop-shadow-[0_10px_16px_rgba(2,45,95,0.28)]" data-purpose="brand-logo-emblem">
+      <svg class="w-full h-full" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <lineargradient id="metalRim" x1="0%" x2="100%" y1="0%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff"></stop>
+            <stop offset="25%" stop-color="#bcd1e3"></stop>
+            <stop offset="50%" stop-color="#60819c"></stop>
+            <stop offset="75%" stop-color="#b6cde0"></stop>
+            <stop offset="100%" stop-color="#466279"></stop>
+          </lineargradient>
+          <lineargradient id="innerPinBg" x1="50%" x2="50%" y1="0%" y2="100%">
+            <stop offset="0%" stop-color="#eaf3fb"></stop>
+            <stop offset="45%" stop-color="#c6ddec"></stop>
+            <stop offset="100%" stop-color="#83a9c7"></stop>
+          </lineargradient>
+          <lineargradient id="needleActive" x1="0%" x2="100%" y1="0%" y2="100%">
+            <stop offset="0%" stop-color="#44bbfb"></stop>
+            <stop offset="50%" stop-color="#0284c7"></stop>
+            <stop offset="100%" stop-color="#03538c"></stop>
+          </lineargradient>
+          <lineargradient id="needleShade" x1="0%" x2="100%" y1="0%" y2="100%">
+            <stop offset="0%" stop-color="#e2edf6"></stop>
+            <stop offset="50%" stop-color="#a4c2db"></stop>
+            <stop offset="100%" stop-color="#6488a7"></stop>
+          </lineargradient>
+        </defs>
+        <path d="M100,6 C53.5,6 16,43.5 16,90 C16,133.5 83,218 94,231.5 C97,235.2 103,235.2 106,231.5 C117,218 184,133.5 184,90 C184,43.5 146.5,6 100,6 Z" fill="url(#innerPinBg)" stroke="url(#metalRim)" stroke-linejoin="round" stroke-width="7"></path>
+        <path d="M100,16 C59,16 26,49 26,90 C26,128 85,202 100,219 C115,202 174,128 174,90 C174,49 141,16 100,16 Z" fill="none" opacity="0.85" stroke="#3e5b72" stroke-width="1.7"></path>
+        <circle cx="100" cy="90" fill="none" r="62" stroke="url(#metalRim)" stroke-width="4.5"></circle>
+        <circle cx="100" cy="90" fill="none" r="54" stroke="#486882" stroke-dasharray="2, 3.5" stroke-width="1.8"></circle>
+        <line opacity="0.6" stroke="#5a7b97" stroke-width="1.5" x1="100" x2="68" y1="90" y2="58"></line>
+        <line opacity="0.6" stroke="#5a7b97" stroke-width="1.2" x1="68" x2="55" y1="58" y2="75"></line>
+        <line opacity="0.6" stroke="#5a7b97" stroke-width="1.2" x1="68" x2="88" y1="58" y2="50"></line>
+        <circle cx="68" cy="58" fill="#587995" r="3.2"></circle>
+        <circle cx="55" cy="75" fill="#587995" r="2.2"></circle>
+        <circle cx="88" cy="50" fill="#587995" r="2.2"></circle>
+        <line opacity="0.6" stroke="#5a7b97" stroke-width="1.5" x1="100" x2="135" y1="90" y2="122"></line>
+        <line opacity="0.6" stroke="#5a7b97" stroke-width="1.2" x1="135" x2="148" y1="122" y2="108"></line>
+        <line opacity="0.6" stroke="#5a7b97" stroke-width="1.2" x1="135" x2="124" y1="122" y2="136"></line>
+        <circle cx="135" cy="122" fill="#587995" r="3.2"></circle>
+        <circle cx="148" cy="108" fill="#587995" r="2"></circle>
+        <circle cx="124" cy="136" fill="#587995" r="2"></circle>
+        <polygon fill="#d9e6f2" points="100,90 94,90 100,34" stroke="#3d5a71" stroke-width="0.8"></polygon>
+        <polygon fill="#7d9db8" points="100,90 106,90 100,34" stroke="#3d5a71" stroke-width="0.8"></polygon>
+        <polygon fill="#8ca9c1" points="100,90 94,90 100,146" stroke="#3d5a71" stroke-width="0.8"></polygon>
+        <polygon fill="#e5eff7" points="100,90 106,90 100,146" stroke="#3d5a71" stroke-width="0.8"></polygon>
+        <polygon fill="#d9e6f2" points="100,90 100,84 44,90" stroke="#3d5a71" stroke-width="0.8"></polygon>
+        <polygon fill="#7597b3" points="100,90 100,96 44,90" stroke="#3d5a71" stroke-width="0.8"></polygon>
+        <polygon fill="#789ab6" points="100,90 100,84 156,90" stroke="#3d5a71" stroke-width="0.8"></polygon>
+        <polygon fill="#e5eff7" points="100,90 100,96 156,90" stroke="#3d5a71" stroke-width="0.8"></polygon>
+        <polygon fill="#9dbcd4" opacity="0.75" points="100,90 102,84 138,52"></polygon>
+        <polygon fill="#789ab6" opacity="0.75" points="100,90 94,98 62,128"></polygon>
+        <polygon fill="#d0e0ed" opacity="0.75" points="100,90 94,84 62,52"></polygon>
+        <polygon fill="#d0e0ed" opacity="0.75" points="100,90 104,96 138,128"></polygon>
+        <g transform="rotate(45 100 90)">
+          <polygon fill="url(#needleActive)" points="100,90 91,90 100,28" stroke="#02477f" stroke-width="1.2"></polygon>
+          <polygon fill="#02569e" points="100,90 109,90 100,28" stroke="#02477f" stroke-width="1.2"></polygon>
+          <polygon fill="#ffffff" opacity="0.8" points="100,32 94,48 100,43"></polygon>
+          <polygon fill="url(#needleShade)" points="100,90 91,90 100,152" stroke="#2f495e" stroke-width="1.2"></polygon>
+          <polygon fill="#eef5fb" points="100,90 109,90 100,152" stroke="#2f495e" stroke-width="1.2"></polygon>
+          <circle cx="100" cy="90" fill="#f8fafc" r="10" stroke="#1d4464" stroke-width="2.2"></circle>
+          <circle cx="100" cy="90" fill="#0284c7" r="4.8"></circle>
+        </g>
+      </svg>
+    </div>
+    <!-- END: CompassBadge -->
+
+    <!-- BEGIN: TitleAndTagline -->
+    <h1 class="text-[52px] sm:text-[60px] leading-tight font-extrabold tracking-wide uppercase brand-gradient-text mb-2 px-1" data-purpose="app-title">
+      TUGON AI
+    </h1>
+    <p class="text-[24px] leading-[1.3] font-medium text-slate-800 max-w-[320px] mt-1 mb-9 tracking-tight text-center" data-purpose="mission-statement">
+      AI for Community Disaster and Social Services
+    </p>
+    <!-- END: TitleAndTagline -->
+  </div>
+
+  <!-- BEGIN: ActionButtonsGroup -->
+  <div class="w-full flex flex-col gap-4 sm:gap-5 pb-2" data-purpose="authentication-actions">
+    <a href="/citizen/register" class="btn-glossy-primary w-full py-[15px] sm:py-[16px] px-7 rounded-full text-white text-[18px] sm:text-[19px] font-bold tracking-wider shadow-pill-btn hover:shadow-pill-btn-hover active:scale-[0.985] transition duration-150 ease-out cursor-pointer uppercase flex items-center justify-center" data-purpose="get-started-button">
+      GET STARTED
+    </a>
+    <a href="/citizen/login" class="btn-glossy-primary w-full py-[15px] sm:py-[16px] px-7 rounded-full text-white text-[18px] sm:text-[19px] font-bold tracking-wider shadow-pill-btn hover:shadow-pill-btn-hover active:scale-[0.985] transition duration-150 ease-out cursor-pointer uppercase flex items-center justify-center" data-purpose="log-in-button">
+      LOG IN
+    </a>
+  </div>
+  <!-- END: ActionButtonsGroup -->
+</section>
+<!-- END: GlassmorphismCard -->
+
+<!-- BEGIN: iOSHomeIndicator -->
+<div class="w-32 h-1 bg-slate-900/35 rounded-full mt-4 z-20 pointer-events-none" data-purpose="home-indicator"></div>
+<!-- END: iOSHomeIndicator -->
+</main>
+<!-- END: MobileDeviceContainer -->
+
+<!-- Admin quick link at bottom -->
+<div class="absolute bottom-4 text-center">
+  <a href="/login" class="text-xs text-slate-400 hover:text-slate-300 transition-colors">
+    <i class="fa-solid fa-user-shield mr-1"></i> Municipal Administrator Portal
+  </a>
+</div>
+</body></html>

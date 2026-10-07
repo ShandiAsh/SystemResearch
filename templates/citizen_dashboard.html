@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TUGON AI — Citizen Dashboard</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Leaflet Map JS (loaded early so initMap can use it) -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Shared TUGON CSS -->
+  <link rel="stylesheet" href="/static/css/styles.css">
+
+  <style>
+    html, body { margin: 0; padding: 0; min-height: 100vh; background: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    .citizen-nav { background: linear-gradient(135deg, #0284c7, #0ea5e9); padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 1.5rem; }
+    .citizen-nav .brand { color: #fff; font-weight: 700; font-size: 1.1rem; text-decoration: none; display: flex; align-items: center; gap: 0.4rem; }
+    /* Nav links grouped on the LEFT side */
+    .citizen-nav .nav-links { display: flex; gap: 0.25rem; align-items: center; }
+    .citizen-nav .nav-link { color: #e0f2fe; padding: 0.4rem 0.8rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; transition: all 150ms; display: flex; align-items: center; gap: 0.4rem; }
+    .citizen-nav .nav-link:hover, .citizen-nav .nav-link.active { background: rgba(255,255,255,0.15); color: #fff; }
+    /* Responsive: collapse nav text labels to icons on mobile */
+    @media (max-width: 768px) {
+      .citizen-nav .nav-text { display: none; }
+      .citizen-nav .brand-text { display: none; }
+      .citizen-nav .nav-link { padding: 0.4rem 0.5rem; }
+    }
+    .page-container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+    .emergency-card { background: linear-gradient(135deg, #4f0202, #a00606); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; color: #f3ecec; }
+    .emergency-card h2 { margin: 0 0 0.75rem; font-size: 1.2rem; }
+    .hotline-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; }
+    .hotline-item { background: rgba(255,255,255,0.4); border-radius: 8px; padding: 0.75rem; text-align: center; }
+    .hotline-item .label { font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .hotline-item .number { font-size: 1.1rem; font-weight: 800; font-family: monospace; }
+    .guide-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 1.5rem; margin-bottom: 1.5rem; }
+    .guide-card h2 { margin: 0 0 1rem; font-size: 1.1rem; color: #1e293b; }
+    .step { display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 0.75rem; }
+    .step .step-num { background: #2563eb; color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.25rem; flex-shrink: 0; }
+    .step .step-text { font-size: 0.85rem; line-height: 1.4; color: #334155; }
+    .reports-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 1.5rem; }
+    .reports-card h2 { margin: 0 0 1rem; font-size: 1.1rem; color: #1e293b; }
+    .report-item { border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem; background: #f8fafc; }
+    .report-item .report-title { font-weight: 700; color: #2563eb; margin-bottom: 0.25rem; }
+    .report-item .report-meta { font-size: 0.8rem; color: #64748b; margin-bottom: 0.5rem; }
+    .report-item .report-desc { font-size: 0.85rem; color: #334155; line-height: 1.4; margin-bottom: 0.5rem; }
+    .report-status { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
+    .btn-edit { background: #f59e0b; color: #fff; border: none; padding: 0.3rem 0.7rem; border-radius: 6px; font-size: 0.75rem; cursor: pointer; }
+    .no-reports { text-align: center; color: #94a3b8; padding: 2rem; }
+    .edit-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .edit-modal .edit-content { background: #fff; border-radius: 12px; padding: 1.5rem; width: 90%; max-width: 500px; }
+    .map-container { height: 300px; border-radius: 8px; border: 1px solid #e2e8f0; }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation (top horizontal; nav links aligned to the RIGHT) -->
+  <nav class="citizen-nav">
+    <a href="/portal" class="brand"><i class="fa-solid fa-satellite-dish"></i> <span class="brand-text">TUGON AI</span></a>
+    <div class="nav-links">
+      <a href="/citizen/dashboard" class="nav-link active"><i class="fa-solid fa-gauge-high"></i> <span class="nav-text">My Dashboard</span></a>
+      <a href="/portal" class="nav-link"><i class="fa-solid fa-camera"></i> <span class="nav-text">Report Incident</span></a>
+      <a href="/citizen/profile" class="nav-link"><i class="fa-solid fa-user"></i> <span class="nav-text">My Profile</span></a>
+      <a href="/" class="nav-link"><i class="fa-solid fa-info-circle"></i> <span class="nav-text">About Us</span></a>
+      <button class="nav-link" id="btnCitizenLogout" style="cursor: pointer; background: none; border: none; padding: 0.4rem 0.8rem; color: #e0f2fe;"><i class="fa-solid fa-right-from-bracket"></i> <span class="nav-text">Sign Out</span></button>
+    </div>
+  </nav>
+
+  <div class="page-container">
+
+    <!-- Emergency Hotlines -->
+    <div class="emergency-card">
+      <h2><i class="fa-solid fa-rectangle-wide"></i> Emergency Hotline Numbers</h2>
+      <p style="margin: 0 0 0.75rem; font-size: 0.9rem;">Save these numbers. Call immediately during emergencies.</p>
+      <div class="hotline-grid">
+        <div class="hotline-item"><div class="label">NATIONAL EMERGENCY</div><div class="number">911</div></div>
+        <div class="hotline-item"><div class="label">CEBU CITY LODS</div><div class="number">032-253-4013</div></div>
+        <div class="hotline-item"><div class="label">CCDRRMO OPERATIONS</div><div class="number">032-255-5555</div></div>
+        <div class="hotline-item"><div class="label">POLICE</div><div class="number">032-255-6222</div></div>
+        <div class="hotline-item"><div class="label">FIREFIGHTERS</div><div class="number">032-254-3999</div></div>
+        <div class="hotline-item"><div class="label">AMBULANCE / MEDICAL</div><div class="number">032-253-1234</div></div>
+      </div>
+    </div>
+
+    <!-- Calamity Preparedness Drill Guide -->
+    <div class="guide-card">
+      <h2><i class="fa-solid fa-book-open"></i> Calamity Preparedness Drill &amp; Guide</h2>
+      <div style="font-size: 0.85rem; line-height: 1.5; color: #475569; margin-bottom: 1rem;">
+        Know what to do before, during, and after common calamities affecting Cebu City (floods, typhoons, earthquakes, fires).
+      </div>
+
+      <h3 style="font-size: 0.9rem; color: #0ea5e9; margin: 1rem 0 0.5rem;"><i class="fa-solid fa-droplet"></i> Flood / Bagyo</h3>
+      <div class="step"><div class="step-num">1</div><div class="step-text">Before: Move to higher ground. Secure important documents (Valid ID, PSA, birth certificate) in a waterproof bag.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">During: Do not walk or drive through floodwater. Avoid electrical panels and substations.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">After: Wait for the all-clear signal. Take photos of damage for your incident report. Bring Valid ID and proof of address when reporting to barangay.</div></div>
+
+      <h3 style="font-size: 0.9rem; color: #0ea5e9; margin: 1rem 0 0.5rem;"><i class="fa-solid fa-bolt"></i> Earthquake</h3>
+      <div class="step"><div class="step-num">1</div><div class="step-text">Drop, Cover, Hold On — get under a sturdy table or desk. Stay away from windows.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">After: Evacuate if the building is damaged. Report injuries and structural damage immediately to 911.</div></div>
+
+      <h3 style="font-size: 0.9rem; color: #0ea5e9; margin: 1rem 0 0.5rem;"><i class="fa-solid fa-fire"></i> Fire</h3>
+      <div class="step"><div class="step-num">1</div><div class="step-text">Immediately call 911 or 032-253-4011 (Bureau of Fire Protection). Do not use elevators.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">Stop, Drop, and Roll if clothing catches fire. Crawl low under smoke to avoid inhaling fumes.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">Once safe: document property damage with photos. Keep Valid ID and Barangay clearance ready for assistance.</div></div>
+
+      <h3 style="font-size: 0.9rem; color: #0ea5e9; margin: 1rem 0 0.5rem;"><i class="fa-solid fa-user-md"></i> Medical Emergency</h3>
+      <div class="step"><div class="step-num">1</div><div class="step-text">Call 911 or 032-253-1234 (ambulance). Provide exact address and nature of emergency.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">Keep the person conscious and still. Have Valid ID and any medical records ready.</div></div>
+    </div>
+
+    <!-- My Submitted Reports -->
+    <div class="reports-card">
+      <h2><i class="fa-solid fa-list"></i> My Submitted Reports</h2>
+      <div id="citizenReportsList">
+        <div class="no-reports" id="reportsLoading">
+          <i class="fa-solid fa-spinner fa-spin" style="font-size: 1.5rem;"></i>
+          <div style="margin-top: 0.5rem;">Loading your reports...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Incident Map -->
+    <div class="reports-card">
+      <h2><i class="fa-solid fa-map-location-dot"></i> My Reported Incidents Map</h2>
+      <div id="citizenMap" class="map-container"></div>
+    </div>
+  </div>
+
+  <!-- Edit Report Modal -->
+  <div class="edit-modal" id="editModal">
+    <div class="edit-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="margin: 0; font-size: 1.1rem; color: #2563eb;"><i class="fa-solid fa-pen"></i> Edit Report</h3>
+        <button id="btnCloseEdit" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
+      </div>
+      <form id="editReportForm">
+        <input type="hidden" id="editReportId">
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #334155; margin-bottom: 0.25rem;">Title</label>
+          <input type="text" id="editTitle" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px;">
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #334155; margin-bottom: 0.25rem;">Description / Narrative</label>
+          <textarea id="editDescription" rows="3" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical;"></textarea>
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #334155; margin-bottom: 0.25rem;">Note (why you're editing)</label>
+          <textarea id="editNote" rows="2" placeholder="e.g. I made a typo, or the address was wrong..." style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical;"></textarea>
+        </div>
+        <div id="editStatus" style="display: none; margin-bottom: 0.75rem;"></div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button type="button" id="btnCancelEdit" style="flex: 1; padding: 0.5rem; background: #f1f5f9; border: 1px solid #ddd; border-radius: 6px; cursor: pointer;">Cancel</button>
+          <button type="submit" id="btnSaveEdit" style="flex: 1; padding: 0.5rem; background: #2563eb; color: #fff; border: none; border-radius: 6px; cursor: pointer;">Save Correction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    /* Auth gate */
+    var citizenName = 'Citizen';
+    var citizenUser = localStorage.getItem('tugon_citizen_user');
+    if (!citizenUser) {
+      window.location.href = '/citizen/login';
+    } else {
+      try {
+        var user = JSON.parse(citizenUser);
+        citizenName = user.full_name || user.username || 'Citizen';
+      } catch (e) {
+        window.location.href = '/citizen/login';
+      }
+    }
+
+    /* Logout */
+    var btnLogout = document.getElementById('btnCitizenLogout');
+    if (btnLogout) {
+      btnLogout.onclick = function() {
+        if (confirm('Sign out from your citizen account?')) {
+          localStorage.removeItem('tugon_citizen_user');
+          window.location.href = '/citizen/login';
+        }
+      };
+    }
+  </script>
+
+  <script>
+    /* Leaflet map */
+    var map = null;
+    var markersLayer = null;
+
+    function initMap() {
+      var mapEl = document.getElementById('citizenMap');
+      if (!mapEl || typeof L === 'undefined') return;
+
+      map = L.map('citizenMap').setView([10.3117, 123.8933], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | TUGON AI Cebu City'
+      }).addTo(map);
+      markersLayer = L.layerGroup().addTo(map);
+    }
+
+    function loadMapMarkers() {
+      if (!map || !markersLayer) return;
+      markersLayer.clearLayers();
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', '/api/citizen/reports?citizen_name=' + encodeURIComponent(citizenName), true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState !== 4 || xhr.status !== 200) return;
+        try {
+          var reports = JSON.parse(xhr.responseText);
+          if (!Array.isArray(reports) || reports.length === 0) return;
+          reports.forEach(function(r) {
+            var lat = r.citizen_lat || r.exif_lat;
+            var lon = r.citizen_lon || r.exif_lon;
+            if (lat != null && lon != null) {
+              L.marker([lat, lon]).addTo(markersLayer)
+                .bindPopup('<strong>' + (r.ticket_number || '') + '</strong><br>' + (r.title || 'No title') +
+                  '<br><span style="font-size:0.75rem;color:#64748b;">' + (r.category || '') + '</span>');
+            }
+          });
+        } catch(e) {}
+      };
+      xhr.send();
+    }
+  </script>
+
+  <script>
+    /* Fetch reports for list */
+    function loadReports() {
+      var list = document.getElementById('citizenReportsList');
+      if (!list) return;
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', '/api/citizen/reports?citizen_name=' + encodeURIComponent(citizenName), true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState !== 4) return;
+        if (xhr.status === 200) {
+          try {
+            var reports = JSON.parse(xhr.responseText);
+            if (!Array.isArray(reports) || reports.length === 0) {
+              list.innerHTML = '<div class="no-reports"><i class="fa-solid fa-folder-open" style="font-size: 2rem;"></i><div style="margin-top: 0.5rem;">No reports submitted yet.</div></div>';
+            } else {
+              list.innerHTML = reports.map(function(r) {
+                var statusColor = '#94a3b8';
+                if (r.status === 'DISPATCHED') statusColor = '#d97706';
+                if (r.status === 'RESOLVED') statusColor = '#059669';
+                if (r.status === 'IN_PROGRESS') statusColor = '#2563eb';
+                var urgencyColor = '#6b7280';
+                if (r.urgency === 'CRITICAL') urgencyColor = '#dc2626';
+                if (r.urgency === 'HIGH') urgencyColor = '#ea580c';
+                return '<div class="report-item">' +
+                  '<div class="report-title">' + r.title + '</div>' +
+                  '<div class="report-meta">' +
+                    'Ticket: ' + r.ticket_number + ' | ' +
+                    'Sector: ' + (r.category || 'N/A') + ' | ' +
+                    '<span class="report-status" style="background:' + statusColor + '; color: #fff; font-size: 0.7rem;">' + r.urgency + '</span>' +
+                  '</div>' +
+                  '<div class="report-desc">' + (r.description || 'No description') + '</div>' +
+                  '<div style="margin-top: 0.5rem;">' +
+                    '<button class="btn-edit" onclick="openEditModal(' + r.id + ', \'' + r.title.replace(/'/g, "\\'") + '\', \'' + (r.description || '').replace(/'/g, "\\'") + '\')">Edit Correction</button>' +
+                  '</div>' +
+                '</div>';
+              }).join('');
+            }
+            /* After reports load, populate map */
+            loadMapMarkers();
+          } catch(e) {
+            list.innerHTML = '<div class="no-reports" style="color:#ef4444;"><i class="fa-solid fa-circle-exclamation"></i> Error loading reports.</div>';
+          }
+        } else {
+          list.innerHTML = '<div class="no-reports" style="color:#ef4444;"><i class="fa-solid fa-circle-exclamation"></i> Failed to load reports.</div>';
+        }
+      };
+      xhr.send();
+    }
+
+    /* Edit modal */
+    window.openEditModal = function(id, title, description) {
+      document.getElementById('editReportId').value = id;
+      document.getElementById('editTitle').value = title;
+      document.getElementById('editDescription').value = description;
+      document.getElementById('editNote').value = '';
+      document.getElementById('editStatus').style.display = 'none';
+      document.getElementById('editStatus').className = '';
+      document.getElementById('editModal').style.display = 'flex';
+    };
+
+    var btnClose = document.getElementById('btnCloseEdit');
+    if (btnClose) btnClose.onclick = function() { document.getElementById('editModal').style.display = 'none'; };
+    var btnCancel = document.getElementById('btnCancelEdit');
+    if (btnCancel) btnCancel.onclick = function() { document.getElementById('editModal').style.display = 'none'; };
+
+    var editForm = document.getElementById('editReportForm');
+    if (editForm) {
+      editForm.onsubmit = function(e) {
+        e.preventDefault();
+        var btn = document.getElementById('btnSaveEdit');
+        var statusEl = document.getElementById('editStatus');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+        var formData = new FormData();
+        formData.append('citizen_name', citizenName);
+        formData.append('title', document.getElementById('editTitle').value);
+        formData.append('description', document.getElementById('editDescription').value);
+        formData.append('correction_note', document.getElementById('editNote').value);
+        var xhr = new XMLHttpRequest();
+        xhr.open('PUT', '/api/citizen/reports/' + document.getElementById('editReportId').value, true);
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState !== 4) return;
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-save"></i> Save Correction';
+          if (xhr.status === 200) {
+            document.getElementById('editModal').style.display = 'none';
+            document.getElementById('editStatus').className = 'auth-success-msg';
+            document.getElementById('editStatus').innerHTML = '<i class="fa-solid fa-circle-check"></i> Report corrected successfully. Reload to see changes.';
+            document.getElementById('editStatus').style.display = 'block';
+            setTimeout(function() { loadReports(); }, 500);
+          } else {
+            var msg = 'Update failed';
+            try { msg = JSON.parse(xhr.responseText).detail || msg; } catch(e2) {}
+            document.getElementById('editStatus').className = 'auth-error-msg';
+            document.getElementById('editStatus').innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> ' + msg;
+            document.getElementById('editStatus').style.display = 'block';
+          }
+        };
+        xhr.send(formData);
+      };
+    }
+
+    /* Initialize map and load reports */
+    initMap();
+    loadReports();
+  </script>
+</body>
+</html>

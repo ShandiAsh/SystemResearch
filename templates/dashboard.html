@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TUGON AI - Sector Command & Forensic Audit Dashboard</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+
+      <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="navbar-inner">
+      <a href="/dashboard" class="brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div>
+          <div class="brand-title" style="white-space: nowrap;"><span class="brand-text">TUGON <span>AI</span></span> <span class="brand-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: rgba(16, 185, 129, 0.3); font-size: 0.65rem; padding: 0.15rem 0.5rem;"><span class="badge-text">CEBU CITY COMMAND</span></span></div>
+        </div>
+      </a>
+      <nav class="nav-links">
+        <a href="/" class="nav-link"><i class="fa-solid fa-camera"></i> <span class="nav-text">Citizen Portal</span></a>
+        <a href="/dashboard" class="nav-link active"><i class="fa-solid fa-gauge-high"></i> <span class="nav-text">Admin Dashboard</span></a>
+        <button class="btn btn-outline btn-sm" id="btnOpenNotificationLogs" type="button" style="color: #cbd5e1; border-color: var(--slate-600); cursor: pointer;">
+          <i class="fa-solid fa-envelope-open-text"></i> <span class="nav-text">Dispatch Email Logs</span>
+        </button>
+        <a href="/login" class="btn btn-primary btn-sm" type="button" style="background: #2563eb; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.45rem 0.9rem;">
+          <i class="fa-solid fa-right-to-bracket" style="pointer-events: none;"></i>
+          <span class="nav-text">Admin Login</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+
+
+  <!-- Main Content Wrapper -->
+  <main class="main-wrapper">
+
+    <!-- Superadmin Report Analysis Section (SUPERADMIN only — first position) -->
+    <div class="card" id="superadminAnalysisSection" style="display: none;">
+      <div class="card-header">
+        <h2 class="card-title" style="font-size: 1rem; white-space: nowrap;">
+          <i class="fa-solid fa-magnifying-glass-chart" style="color: #7c3aed;"></i> SUPERADMIN — Report Analysis &amp; Forensics
+        </h2>
+      </div>
+      <div class="card-body">
+        <div id="superadminAnalysisContent" style="text-align: center; padding: 2rem; color: var(--slate-400);">
+          <i class="fa-solid fa-spinner fa-spin" style="font-size: 1.5rem;"></i>
+          <div style="margin-top: 0.5rem;">Loading superadmin analysis...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Incident Map & Sector Distribution -->
+    <div class="dashboard-map-grid">
+      
+      <!-- Leaflet Geospatial Incident Map -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title"><i class="fa-solid fa-map-location-dot" style="color: var(--primary);"></i> Geospatial Incident Map</h2>
+            <p class="card-subtitle">Real-time incident pins with forensic verification telemetry</p>
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn-pill" id="btnResetMapView"><i class="fa-solid fa-crosshairs"></i> Reset Cebu City Bounds</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding: 0;">
+          <div id="dashboardMap"></div>
+        </div>
+      </div>
+
+      <!-- Sector Summary Panel -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title" style="font-size: 1rem;"><i class="fa-solid fa-chart-pie" style="color: #38bdf8;"></i> Sector Allocation</h2>
+        </div>
+        <div class="card-body" style="font-size: 0.85rem;" id="sectorTallyList">
+          <!-- Loaded via JS -->
+          <div style="text-align: center; color: var(--slate-400); padding: 2rem 0;">Loading sector telemetry...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Partner Sector Filter Pills -->
+    <div class="card">
+      <div class="card-header" style="flex-wrap: wrap; gap: 1rem; align-items: flex-start;">
+        <div>
+          <h2 class="card-title" style="font-size: 1rem; white-space: nowrap; font-family: 'Segoe UI', system-ui, sans-serif;"><i class="fa-solid fa-table-list" style="color: var(--primary);"></i> Incident Management &amp; Forensic Review</h2>
+          <p class="card-subtitle" style="font-size: 0.8rem; font-family: 'Segoe UI', system-ui, sans-serif;">Filter, audit EXIF metadata, verify geolocation, and dispatch responders</p>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+          <!-- Search Bar -->
+          <div style="display: flex; align-items: center; gap: 0.25rem; background: #f1f5f9; border-radius: 6px; padding: 0.3rem 0.6rem;">
+            <i class="fa-solid fa-search" style="color: var(--slate-500); font-size: 0.85rem;"></i>
+            <input type="text" id="reportSearchInput" placeholder="Search reports by ticket, title, or sector..." style="border: none; outline: none; background: transparent; font-size: 0.8rem; width: 200px; min-width: 180px;">
+          </div>
+
+          <!-- Verification Status Quick Filter -->
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <label style="font-size: 0.8rem; font-weight: 600; color: var(--slate-600);">Forensic Filter:</label>
+            <select id="filterVerifStatus" class="form-control" style="width: auto; padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+              <option value="ALL">All Forensic States</option>
+              <option value="VERIFIED_GENUINE">Verified Genuine Only</option>
+              <option value="GPS_DISCREPANCY_FLAGGED">Discrepancy Flagged Only</option>
+              <option value="EXIF_MISSING_FALLBACK_ACTIVE">Privacy Fallback Active</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <!-- Sector Category Filter Tabs -->
+        <div class="tabs-bar" id="sectorTabs">
+          <button class="tab-pill active" data-sector="ALL">All Sectors</button>
+          <button class="tab-pill" data-sector="FIRST_RESPONDERS" style="--tab-color: #ef4444;">🚑 First Responders</button>
+          <button class="tab-pill" data-sector="SOCIAL_WELFARE" style="--tab-color: #f59e0b;">🤝 Social Welfare</button>
+          <button class="tab-pill" data-sector="PUBLIC_HEALTH" style="--tab-color: #06b6d4;">🏥 Public Health</button>
+          <button class="tab-pill" data-sector="INFRASTRUCTURE_UTILITIES" style="--tab-color: #10b981;">🏗️ Infrastructure</button>
+          <button class="tab-pill" data-sector="AGRICULTURE_ANIMAL" style="--tab-color: #8b5cf6;">🌾 Agriculture &amp; Animal</button>
+        </div>
+
+        <!-- Reports Table -->
+      <div class="table-responsive">
+        <table class="data-table">
+          <colgroup>
+            <col style="width: 140px;">
+            <col style="width: 70px;">
+            <col style="min-width: 280px; width: 320px;">
+            <col style="width: 140px;">
+            <col style="width: 110px;">
+            <col style="width: 100px;">
+            <col style="width: 160px;">
+            <col style="width: 140px;">
+            <col style="width: 160px;">
+          </colgroup>
+          <thead>
+              <tr>
+                <th>Ticket ID</th>
+                <th>Evidence</th>
+                <th>Incident Details</th>
+                <th>Sector</th>
+                <th>AI Confidence</th>
+                <th>Urgency</th>
+                <th>Forensic Audit</th>
+                <th>Status</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="reportsTableBody">
+              <tr>
+                <td colspan="9" style="text-align: center; color: var(--slate-400); padding: 2rem;">Loading reports...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Detailed Forensic Inspector Modal -->
+  <div class="modal-overlay" id="forensicModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="card-title" id="modalTicketTitle"><i class="fa-solid fa-microscope" style="color: #2563eb;"></i> Forensic Incident Inspector</h3>
+        <button class="modal-close" id="btnCloseForensicModal">&times;</button>
+      </div>
+      <div class="modal-body" id="forensicModalBody">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Logs Modal -->
+  <div class="modal-overlay" id="notificationModal">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3 class="card-title"><i class="fa-solid fa-envelope-circle-check" style="color: #2563eb;"></i> Automated Sector Dispatch Logs</h3>
+        <button class="modal-close" id="btnCloseNotificationModal">&times;</button>
+      </div>
+      <div class="modal-body" id="notificationModalBody">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+
+  <footer class="footer">
+    <strong>TUGON AI</strong> &mdash; Municipal Command Center & Forensic Verification Engine. Capstone Research Project.
+  </footer>
+
+  <!-- Leaflet & JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
+

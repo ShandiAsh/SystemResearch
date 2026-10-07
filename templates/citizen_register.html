@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TUGON AI — Citizen Registration</title>
+
+  <!-- Font Awesome for civic & social icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&;display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+            },
+            civicBg: '#eef2f8',
+          },
+          boxShadow: {
+            'portal': '0 20px 40px -15px rgba(30, 64, 175, 0.08), 0 0 1px 1px rgba(0, 0, 0, 0.04)',
+          }
+        }
+      }
+    }
+  </script>
+  <style data-purpose="custom-layout">
+    body {
+      background-color: #eef2f8;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Robobos, sans-serif;
+    }
+    .form-scrollbar::-webkit-scrollbar { width: 5px; }
+    .form-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+    .form-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .form-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .auth-error-msg {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      border-radius: 8px;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+    .auth-success-msg {
+      background: #d1fae5;
+      border: 1px solid #6ee7b7;
+      color: #065f46;
+      border-radius: 8px;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between antialiased selection:bg-brand-500 selection:text-white">
+
+<!-- BEGIN: MainContentSection -->
+<main class="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+  <div class="w-full max-w-[1120px] bg-white rounded-3xl shadow-portal border border-slate-100/80 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[680px]">
+
+    <!-- BEGIN: LeftIllustrationColumn -->
+    <!-- Picture on the LEFT side -->
+    <section class="lg:col-span-6 flex-1 flex flex-col justify-center items-center p-6 md:p-8 lg:p-10 w-full h-full min-h-[500px] bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 border-r border-slate-100 relative overflow-hidden" data-purpose="civic-command-illustration">
+      <!-- Ambient Graphic Backdrops -->
+      <div class="absolute -top-20 -right-20 w-80 h-80 bg-blue-200/35 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -left-20 w-72 h-72 bg-sky-200/25 rounded-full blur-2xl pointer-events-none"></div>
+      <!-- Command Graphic Container: Cebu City Community Volunteers -->
+      <div class="relative w-full max-w-lg flex flex-col items-center justify-center py-4 my-auto">
+        <div class="w-full flex flex-col items-center text-center">
+          <!-- Main Illustration Image -->
+          <div class="relative w-full max-w-md rounded-2xl overflow-hidden shadow-xl border border-white/60 bg-white flex items-center justify-center">
+            <img src="https://img.magnific.com/premium-vector/rescue-teams-save-people-drowning-ocean-by-helicopter-inflatable-rubber-boat-life-jacket_343650-99.jpg"
+                 alt="Cebu City Community First Response" class="w-full h-auto object-cover">
+          </div>
+          <div class="mt-4 space-y-1">
+            <span class="inline-block text-[11px] font-semibold text-brand-700 bg-brand-50 px-3 py-1 rounded-full border border-blue-100/80">Community First Response</span>
+            <h3 class="text-base font-bold text-slate-800 tracking-tight">United for a Resilient Cebu City</h3>
+            <p class="text-xs text-slate-500 max-w-xs">Empowering barangays and active citizens through prompt, coordinated civic response for disaster and social services.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- END: LeftIllustrationColumn -->
+
+    <!-- BEGIN: RightFormColumn -->
+    <!-- Right side: TUGON AI Citizen Registration Form -->
+    <section class="lg:col-span-6 p-7 sm:p-10 lg:p-12 flex flex-col justify-between overflow-y-auto max-h-[85vh] lg:max-h-none form-scrollbar" data-purpose="registration-form-container">
+      <div>
+        <!-- Title & Badge -->
+        <div class="flex items-baseline justify-between mb-6">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-brand-600">Create account</h1>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">Register for Cebu City Emergency &amp; Civic Services</p>
+          </div>
+          <span class="text-xs bg-blue-50 text-brand-700 px-2.5 py-1 rounded-md font-semibold border border-blue-100/60 hidden sm:inline-block">Citizen Portal</span>
+        </div>
+
+        <!-- Registration Form -->
+        <form class="space-y-4" id="citizenRegisterForm" autocomplete="off">
+          <!-- Username -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5" for="citizenUsername">Username</label>
+            <input class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/40 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all outline-none"
+                   id="citizenUsername" name="username" placeholder="e.g. juan_delosreyes_88" required type="text">
+          </div>
+
+          <!-- Password & Confirm -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5" for="citizenPassword">Password</label>
+              <input class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/40 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all outline-none"
+                     id="citizenPassword" name="password" placeholder="Minimum 6 characters" required type="password">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5" for="citizenConfirm">Confirm</label>
+              <input class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/40 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all outline-none"
+                     id="citizenConfirm" name="confirm_password" placeholder="Re-type password" required type="password">
+            </div>
+          </div>
+
+          <!-- Full Name & Mobile Number -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5" for="citizenName">Full Name</label>
+              <input class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/40 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all outline-none"
+                     id="citizenName" name="full_name" placeholder="Juan Dela Cruz" required type="text">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5" for="citizenPhone">Mobile Number</label>
+              <div class="relative flex items-center">
+                <div class="absolute left-3.5 flex items-center space-x-1.5 pointer-events-none text-slate-500 font-medium text-sm">
+                  <span>🇵�</span>
+                  <span>+63</span>
+                </div>
+                <input class="w-full pl-20 pr-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/40 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all outline-none"
+                       id="citizenPhone" name="phone_number" placeholder="917 123 4567" required type="tel">
+              </div>
+            </div>
+          </div>
+
+          <!-- Barangay & Email -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5" for="citizenBarangay">Barangay</label>
+              <select class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/40 text-slate-800 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all outline-none"
+                      id="citizenBarangay" name="barangay" required>
+                <option value="">Select Barangay</option>
+                <option value="Mambaling">Barangay Mambaling</option>
+                <option value="Pardo">Barangay Pardo</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5" for="citizenEmail">Email Address</label>
+              <input class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/40 text-slate-800 placeholder-slate-400 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all outline-none"
+                     id="citizenEmail" name="email" placeholder="optional@email.ph" type="email">
+            </div>
+          </div>
+
+          <!-- Sign Up Button -->
+          <div class="pt-2">
+            <button type="submit" class="w-full py-3 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-[0.98] text-white font-semibold text-sm transition-all shadow-md shadow-brand-600/20 text-center flex items-center justify-center" id="btnCitizenRegister">
+              <i class="fa-solid fa-user-plus mr-2"></i> Sign Up
+            </button>
+          </div>
+
+          <!-- Terms Checkbox -->
+          <div class="flex items-start space-x-2 pt-1">
+            <input class="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500/20 cursor-pointer"
+                   id="terms" required type="checkbox">
+            <label class="text-xs text-slate-500 select-none" for="terms">
+              I agree with the <a class="text-brand-600 hover:underline" href="#">terms of service</a>
+              and Republic Act 10173 (Data Privacy Act of 2012).
+            </label>
+          </div>
+        </form>
+
+        <div id="citizenRegisterStatus" style="display:none;"></div>
+      </div>
+
+      <!-- Footer: Sign In Link -->
+      <div class="pt-5 border-t border-slate-100 mt-5 text-center">
+        <p class="text-xs text-slate-500">
+          Already have a citizen account?
+          <a class="font-semibold text-brand-600 hover:text-brand-700 hover:underline ml-1 inline-flex items-center gap-0.5" href="/citizen/login">
+            Sign in here
+            <i class="fa-solid fa-angle-right text-[10px]"></i>
+          </a>
+        </p>
+      </div>
+    </section>
+    <!-- END: RightFormColumn -->
+
+  </div>
+</main>
+
+<!-- BEGIN: CivicFooter -->
+<footer class="w-full py-4 px-6 text-center text-xs text-slate-500 border-t border-slate-200/60 bg-white/50 backdrop-blur-sm">
+  <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+    <div class="flex items-center space-x-2">
+      <span>© 2025 City Government of Cebu. All Rights Reserved.</span>
+      <span class="text-slate-300">|</span>
+      <span class="font-medium text-slate-600">TUGON AI Civic Command Platform</span>
+    </div>
+    <div class="flex items-center space-x-4">
+      <a href="/citizen/register" class="text-brand-600 hover:text-brand-700 transition-colors">Privacy Notice</a>
+      <a href="/" class="text-brand-600 hover:text-brand-700 transition-colors">Citizen Charter</a>
+      <a class="hover:text-brand-600 transition-colors" href="tel:161">Emergency Services 161</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('citizenRegisterForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btnCitizenRegister');
+    const status = document.getElementById('citizenRegisterStatus');
+    status.style.display = 'block';
+    status.className = '';
+    status.innerHTML = '';
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating Account...';
+
+    const pwd = document.getElementById('citizenPassword').value;
+    const confirm = document.getElementById('citizenConfirm').value;
+    const phone = document.getElementById('citizenPhone').value;
+
+    if (pwd !== confirm) {
+      status.className = 'auth-error-msg';
+      status.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Passwords do not match.';
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Sign Up';
+      return;
+    }
+    if (pwd.length < 6) {
+      status.className = 'auth-error-msg';
+      status.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Password must be at least 6 characters.';
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Sign Up';
+      return;
+    }
+    if (!/^0?9\d{9}$/.test(phone)) {
+      status.className = 'auth-error-msg';
+      status.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Mobile number must be in format 09XXXXXXXXX (11 digits).';
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Sign Up';
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/citizen/auth/register', {
+        method: 'POST',
+        body: new FormData(e.target)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Registration failed');
+
+      localStorage.setItem('tugon_citizen_user', JSON.stringify(data.user));
+      status.className = 'auth-success-msg';
+      status.innerHTML = '<i class="fa-solid fa-circle-check"></i> Account created! Redirecting...';
+      setTimeout(() => window.location.href = '/portal', 1500);
+    } catch (err) {
+      status.className = 'auth-error-msg';
+      status.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> ' + err.message;
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Sign Up';
+    }
+  });
+</script>
+</body>
+</html>

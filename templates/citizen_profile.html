@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TUGON AI — Citizen Profile</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    html, body {
+      margin: 0; padding: 0; min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    .auth-wrapper { display: flex; align-items: center; justify-content: center; width: 100%; padding: 1rem; }
+    .auth-card {
+      background: #ffffff; border-radius: 16px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      width: 100%; max-width: 600px; overflow: hidden; margin: auto;
+    }
+    .auth-header { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: #ffffff; padding: 2rem; text-align: center; }
+    .auth-header .brand-icon { width: 56px; height: 56px; margin: 0 auto 0.5rem; background: rgba(255, 255, 255, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+    .auth-header h1 { font-size: 1.4rem; font-weight: 800; margin: 0; }
+    .auth-header p { font-size: 0.85rem; opacity: 0.9; margin-top: 0.3rem; }
+    .auth-body { padding: 2rem; }
+    .auth-footer { text-align: center; padding: 1.25rem 2rem 2rem; border-top: 1px solid #e2e8f0; font-size: 0.9rem; color: #64748b; }
+    .auth-switch-link { color: #2563eb; font-weight: 600; text-decoration: none; }
+    .auth-switch-link:hover { text-decoration: underline; }
+    .auth-error-msg { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; border-radius: 8px; padding: 0.6rem 0.85rem; font-size: 0.85rem; margin-bottom: 1rem; }
+    .auth-success-msg { background: #d1fae5; border: 1px solid #6ee7b7; color: #065f46; border-radius: 8px; padding: 0.6rem 0.85rem; font-size: 0.85rem; margin-bottom: 1rem; }
+
+    .form-group { margin-bottom: 1.25rem; }
+    .form-row-2col { display: flex; gap: 1rem; }
+    .form-row-2col > .form-group { flex: 1; margin-bottom: 0; }
+    @media (max-width: 600px) { .form-row-2col { flex-direction: column; gap: 0; } .form-row-2col > .form-group { margin-bottom: 1.25rem; } .form-row-2col > .form-group:last-child { margin-bottom: 0; } }
+    .form-label { display: block; font-size: 0.8rem; font-weight: 600; color: #334155; margin-bottom: 0.35rem; }
+    .form-label-required::after { content: " *"; color: #ef4444; }
+    .form-control { width: 100%; padding: 0.6rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; transition: border-color 150ms; }
+    .form-control:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15); }
+    .form-control[readonly] { background: #f8fafc; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.95rem; font-weight: 600; padding: 0.8rem 1.4rem; border-radius: 12px; border: none; cursor: pointer; transition: all 150ms ease; text-decoration: none; }
+    .btn-primary { background: #2563eb; color: #ffffff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-outline { background: transparent; border: 1px solid #cbd5e1; color: #475569; }
+    .btn-outline:hover { background: #f1f5f9; }
+    .btn-block { width: 100%; }
+    .btn-sm { padding: 0.35rem 0.7rem; font-size: 0.8rem; }
+
+    /* Section styling */
+    .form-section { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0; }
+    .form-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .section-title { font-size: 0.85rem; font-weight: 700; color: #2563eb; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem; }
+    .section-title i { font-size: 0.75rem; opacity: 0.7; }
+
+    /* Toggle switch */
+    .toggle-switch { position: relative; display: inline-block; width: 42px; height: 24px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #cbd5e1; border-radius: 24px; transition: 0.2s; }
+    .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.2s; }
+    input:checked + .toggle-slider { background: #2563eb; }
+    input:checked + .toggle-slider:before { transform: translateX(18px); }
+
+    .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9; }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-row-label { font-size: 0.85rem; color: #334155; display: flex; align-items: center; gap: 0.5rem; }
+    .setting-row-desc { font-size: 0.7rem; color: #94a3b8; margin-left: 1.5rem; }
+
+    .location-badge { display: inline-block; font-size: 0.7rem; background: #dbeafe; color: #2563eb; border-radius: 9999px; padding: 0.15rem 0.5rem; }
+  </style>
+</head>
+<body>
+
+  <div class="auth-wrapper">
+    <div class="auth-card">
+
+      <!-- Header -->
+      <div class="auth-header">
+        <div class="brand-icon"><i class="fa-solid fa-id-card"></i></div>
+        <h1>Personal Identification &amp; Geolocation</h1>
+        <p>Your profile details and location settings</p>
+      </div>
+
+      <!-- Body -->
+      <div class="auth-body" id="profileBody">
+        <div id="profileLoading" style="display: block; text-align: center; padding: 2rem 0; color: #94a3b8;">
+          <i class="fa-solid fa-spinner fa-spin" style="font-size: 1.5rem;"></i>
+          <div style="margin-top: 0.5rem;">Loading profile...</div>
+        </div>
+
+        <form id="citizenProfileForm" autocomplete="off" style="display: none;">
+          <input type="hidden" id="profileUserId" name="id">
+
+          <!-- PERSONAL IDENTIFICATION -->
+          <div class="form-section">
+            <div class="section-title"><i class="fa-solid fa-user"></i> Personal Information</div>
+
+            <div class="form-group">
+              <label class="form-label" for="profileUsername">Username</label>
+              <input type="text" id="profileUsername" name="username" class="form-control" readonly>
+            </div>
+
+            <div class="form-row-2col">
+              <div class="form-group">
+                <label class="form-label form-label-required" for="profileFullName">Full Name</label>
+                <input type="text" id="profileFullName" name="full_name" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label form-label-required" for="profilePhone">Mobile Number</label>
+                <div class="relative">
+                  <input type="tel" id="profilePhone" name="phone_number" class="form-control" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row-2col">
+              <div class="form-group">
+                <label class="form-label" for="profileAge">Age</label>
+                <input type="number" id="profileAge" name="age" class="form-control" min="12" max="120" placeholder="28">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profileGender">Gender</label>
+                <select id="profileGender" name="gender" class="form-control">
+                  <option value="">Prefer not to say</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="nonbinary">Non-binary</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="profileEmail">Email Address</label>
+              <input type="email" id="profileEmail" name="email" class="form-control" placeholder="optional@email.ph">
+            </div>
+          </div>
+
+          <!-- GEOLOCATION -->
+          <div class="form-section">
+            <div class="section-title"><i class="fa-solid fa-location-dot"></i> Geolocation &amp; Address</div>
+
+            <div class="form-group">
+              <label class="form-label form-label-required" for="profileAddress">House No. / Purok / Sitio</label>
+              <input type="text" id="profileAddress" name="address" class="form-control" placeholder="e.g. 123 Main St, Purok 4" required>
+            </div>
+
+            <div class="form-row-2col">
+              <div class="form-group">
+                <label class="form-label form-label-required" for="profileBarangay">Barangay</label>
+                <select id="profileBarangay" name="barangay" class="form-control" required>
+                  <option value="Mambaling">Barangay Mambaling</option>
+                  <option value="Pardo">Barangay Pardo</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profileCoordinates" style="display: flex; align-items: center; gap: 0.4rem;">
+                  <i class="fa-solid fa-crosshairs" style="color: #94a3b8;"></i> Device Coordinates
+                </label>
+                <div style="display: flex; gap: 0.5rem;">
+                  <input type="text" id="profileLat" name="citizen_lat" class="form-control" placeholder="Latitude" readonly>
+                  <input type="text" id="profileLon" name="citizen_lon" class="form-control" placeholder="Longitude" readonly>
+                </div>
+                <div style="margin-top: 0.5rem;">
+                  <button type="button" class="btn btn-outline btn-sm" id="btnGetLocation" style="font-size: 0.8rem;">
+                    <i class="fa-solid fa-location-dot"></i> Capture Current Location
+                  </button>
+                  <span class="location-badge" id="locationStatusBadge" style="display:none;">Captured</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PASSWORD -->
+          <div class="form-section">
+            <div class="section-title"><i class="fa-solid fa-key"></i> Password</div>
+
+            <div class="form-group">
+              <label class="form-label" for="profilePassword" style="display: flex; align-items: center; gap: 0.4rem;">
+                <i class="fa-solid fa-lock" style="color: #94a3b8;"></i> New Password
+              </label>
+              <input type="password" id="profilePassword" name="password" class="form-control">
+            </div>
+          </div>
+
+          <!-- SETTINGS -->
+          <div class="form-section">
+            <div class="section-title"><i class="fa-solid fa-cog"></i> Settings</div>
+
+            <div class="setting-row">
+              <label class="setting-row-label" for="settingEmailNotif">
+                <i class="fa-solid fa-envelope" style="color: #2563eb;"></i> Email Notifications
+              </label>
+              <label class="toggle-switch"><input type="checkbox" id="settingEmailNotif" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <label class="setting-row-label" for="settingSmsNotif">
+                <i class="fa-solid fa-sms" style="color: #10b981;"></i> SMS Alerts
+              </label>
+              <label class="toggle-switch"><input type="checkbox" id="settingSmsNotif" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <label class="setting-row-label" for="settingPublicProfile">
+                <i class="fa-solid fa-globe" style="color: #8b5cf6;"></i> Public Profile
+              </label>
+              <label class="toggle-switch"><input type="checkbox" id="settingPublicProfile"><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <label class="setting-row-label" for="settingLocationShare">
+                <i class="fa-solid fa-location-sharing" style="color: #ef4444;"></i> Share Location with Emergency Services
+              </label>
+              <label class="toggle-switch"><input type="checkbox" id="settingLocationShare" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row-desc">Location sharing helps emergency responders coordinate faster during incidents. You can disable this at any time.</div>
+          </div>
+
+          <div id="profileStatus" style="display:none; margin: 1rem 0;"></div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="btnSaveProfile">
+            <i class="fa-solid fa-save"></i> Save Changes
+          </button>
+        </form>
+
+        <!-- Profile Stats -->
+        <div class="profile-stat" id="profileStats" style="display: none; margin-top: 1.5rem; padding-top: 1.5rem;">
+          <div><div class="stat-value" id="statRole">CITIZEN</div><div class="stat-label">Role</div></div>
+          <div><div class="stat-value" id="statReports">0</div><div class="stat-label">Reports Filed</div></div>
+          <div><div class="stat-value" id="profileCreated">—</div><div class="stat-label">Member Since</div></div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem; flex-wrap: wrap;">
+          <a href="/citizen/dashboard" class="btn btn-outline btn-sm" style="flex: 1;">
+            <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+          </a>
+          <button class="btn btn-outline btn-sm" id="btnHelpSupport" style="flex: 1;">
+            <i class="fa-solid fa-life-ring"></i> Help &amp; Support
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="auth-footer">
+        <a href="/citizen/dashboard" class="auth-switch-link"><i class="fa-solid fa-arrow-left"></i> Back to Citizen Dashboard</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      function hideLoading() { document.getElementById('profileLoading').style.display = 'none'; }
+      function showForm() {
+        document.getElementById('citizenProfileForm').style.display = 'block';
+        document.getElementById('profileStats').style.display = 'flex';
+      }
+      function showError(msg) {
+        var el = document.getElementById('profileLoading');
+        el.innerHTML = '<div style="color:#ef4444;"><i class="fa-solid fa-circle-exclamation"></i> ' + msg + '</div>';
+      }
+
+      var citizenUser = localStorage.getItem('tugon_citizen_user');
+      if (!citizenUser) { window.location.href = '/citizen/login'; return; }
+      var user;
+      try { user = JSON.parse(citizenUser); } catch { window.location.href = '/citizen/login'; return; }
+
+      fetch('/api/citizen/profile?user_id=' + encodeURIComponent(user.id || ''), { method: 'GET', credentials: 'include' })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data.detail) { showError(data.detail); return; }
+          Object.assign(user, data.user || data);
+          document.getElementById('profileUserId').value = user.id || '';
+          document.getElementById('profileUsername').value = user.username || '';
+          document.getElementById('profileFullName').value = user.full_name || '';
+          document.getElementById('profilePhone').value = user.phone_number || '';
+          document.getElementById('profileBarangay').value = user.barangay || 'Mambaling';
+          document.getElementById('profileEmail').value = user.email || '';
+          document.getElementById('profileAge').value = user.age || '';
+          document.getElementById('profileGender').value = user.gender || '';
+          document.getElementById('profileAddress').value = user.address || '';
+          document.getElementById('profileCreated').textContent = user.created_at
+            ? new Date(user.created_at).toLocaleDateString('en-PH', { month: 'short', year: 'numeric' }) : '—';
+          document.getElementById('statReports').textContent = user.reports_count || 0;
+          hideLoading();
+          showForm();
+        })
+        .catch(function(err) { showError(err.message || 'Failed to load profile'); });
+
+      // Get current location button
+      var btnLoc = document.getElementById('btnGetLocation');
+      if (btnLoc) {
+        btnLoc.onclick = function() {
+          if (!navigator.geolocation) {
+            alert('Geolocation is not supported by your browser.');
+            return;
+          }
+          var badge = document.getElementById('locationStatusBadge');
+          navigator.geolocation.getCurrentPosition(function(pos) {
+            document.getElementById('profileLat').value = pos.coords.latitude.toFixed(7);
+            document.getElementById('profileLon').value = pos.coords.longitude.toFixed(7);
+            badge.style.display = 'inline-block';
+          }, function(err) {
+            alert('Unable to capture location: ' + err.message);
+          });
+        };
+      }
+
+      // Form save handler
+      var form = document.getElementById('citizenProfileForm');
+      if (form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          var btn = document.getElementById('btnSaveProfile');
+          var statusEl = document.getElementById('profileStatus');
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+          statusEl.style.display = 'block';
+          statusEl.className = '';
+          var formData = new FormData(e.target);
+          formData.append('user_id', user.id || '');
+          fetch('/api/citizen/profile', { method: 'PUT', credentials: 'include', body: formData })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+              if (data.detail) throw new Error(data.detail);
+              statusEl.className = 'auth-success-msg';
+              statusEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Profile updated successfully.';
+              localStorage.setItem('tugon_citizen_user', JSON.stringify(data.user));
+            })
+            .catch(function(err) {
+              statusEl.className = 'auth-error-msg';
+              statusEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> ' + err.message;
+            })
+            .finally(function() {
+              btn.disabled = false;
+              btn.innerHTML = '<i class="fa-solid fa-save"></i> Save Changes';
+            });
+        });
+      }
+
+      var btnHelp = document.getElementById('btnHelpSupport');
+      if (btnHelp) {
+        btnHelp.onclick = function() {
+          alert('TUGON AI Citizen Support\n\nFor assistance:\n• Call: 032-253-4013 (Cebu City LODS)\n• Email: support@tugon-cebu.gov.ph\n• Visit: Barangay Hall, Mambaling or Pardo');
+        };
+      }
+    });
+  </script>
+</body>
+</html>

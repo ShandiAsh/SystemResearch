@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TUGON AI - Report a Municipal Incident</title>
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              navy: '#0b1329',
+              dark: '#0f172a',
+              cardDark: '#131e3a',
+              blue: '#2563eb',
+              lightBlue: '#1d4ed8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- BEGIN: Custom Styles -->
+  <style data-purpose="custom-utilities">
+    body {
+      background-color: #f1f5f9;
+      color: #0f172a;
+    }
+     .pulse-dot {
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+      animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
+    .pulse { display: inline-block !important; }
+    .gps-dot { width: 10px; height: 10px; border-radius: 50%; background: #94a3b8; display: none; }
+    .gps-dot.active, .gps-dot.pulse { display: inline-block !important; background: #10b981; }
+    .dropzone.dragover { border-color: #2563eb; background: #eff6ff; }
+    .image-preview-container[style*="display"] { /* handled by JS */ }
+    #previewContainer { display: none; }
+    #previewContainer.visible { display: block !important; }
+    /* Badge styles for urgency badge */
+    .badge { display: inline-flex; align-items: center; padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
+    .badge-urgency-CRITICAL { background: #fee2e2; color: #991b1b; }
+    .badge-urgency-HIGH { background: #ffedd5; color: #9a3412; }
+    .badge-urgency-MEDIUM { background: #eff6ff; color: #1e40af; }
+    .badge-urgency-LOW { background: #f1f5f9; color: #334155; }
+    .badge-verif-VERIFIED_GENUINE { background: #d1fae5; color: #065f46; border-color: #6ee7b7; }
+    .badge-verif-GPS_DISCREPANCY_FLAGGED { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
+    .badge-verif-EXIF_MISSING_FALLBACK_ACTIVE { background: #fffbeb; color: #9a3412; border-color: #fde68a; }
+
+    /* Modal overlay show/hide */
+    #resultModal { display: none !important; }
+    #resultModal.active { display: flex !important; }
+
+    /* Button styles used by dynamically rendered modal content */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.95rem; font-weight: 600; padding: 0.8rem 1.4rem; border-radius: 12px; border: none; cursor: pointer; transition: all 150ms ease; text-decoration: none; }
+    .btn-primary { background: #2563eb; color: #ffffff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-outline { background: transparent; border: 1px solid var(--slate-300); color: var(--slate-700); }
+    .btn-outline:hover { background: var(--slate-100); }
+    .btn-block { width: 100%; }
+
+    /* CSS variables used by dynamically generated content */
+    :root {
+      --radius-md: 12px;
+      --radius-full: 9999px;
+      --radius-sm: 8px;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --slate-300: #cbd5e1;
+      --slate-500: #94a3b8;
+      --slate-700: #334155;
+      --slate-800: #1e293b;
+      --slate-900: #0f172a;
+      --transition-fast: 150ms;
+      --transition-normal: 300ms;
+      --shadow-glow: 0 0 15px rgba(37, 99, 235, 0.4);
+      --shadow-portal: 0 20px 40px -15px rgba(30, 64, 175, 0.08), 0 0 1px 1px rgba(0, 0, 0, 0.04);
+    }
+    .navbar {
+      background: var(--slate-900);
+      color: #0f5cf6;
+      border-bottom: 1px solid var(--slate-800);
+      padding: 0.85rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+    .navbar-inner {
+      max-width: 1300px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #ffffff;
+    }
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #2563eb, #38bdf8);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 800;
+      box-shadow: var(--shadow-glow);
+    }
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .brand-title span { color: #38bdf8; }
+    .brand-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      margin-left: 0.5rem;
+      letter-spacing: 0.5px;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--slate-300);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.5rem 0.9rem;
+      border-radius: var(--radius-md);
+      transition: all var(--transition-fast);
+    }
+    .nav-link:hover, .nav-link.active {
+      color: #ffffff;
+      background: var(--slate-800);
+    }
+    .nav-link.btn-action {
+      background: var(--primary);
+      color: #ffffff;
+    }
+    .nav-link.btn-action:hover {
+      background: var(--primary-hover);
+    }
+
+    /* Responsive: collapse nav text labels to icons on mobile */
+    @media (max-width: 768px) {
+      .nav-link .nav-text {
+        display: none;
+      }
+      .nav-link {
+        padding: 0.5rem 0.6rem;
+      }
+      .nav-link:hover {
+        background: var(--slate-700);
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased text-slate-800">
+
+<header class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="brand">
+      <div class="brand-icon">
+        <i class="fa-solid fa-satellite-dish"></i>
+      </div>
+      <div>
+        <div class="brand-title">TUGON <span>AI</span> <span class="brand-badge">CEBU CITY</span></div>
+      </div>
+    </a>
+    <nav class="nav-links">
+      <a href="/portal" class="nav-link active"><i class="fa-solid fa-camera"></i> <span class="nav-text">Report Incident</span></a>
+      <a href="/citizen/dashboard" class="nav-link"><i class="fa-solid fa-gauge-high"></i> <span class="nav-text">My Dashboard</span></a>
+      <a href="/citizen/profile" class="nav-link"><i class="fa-solid fa-user"></i> <span class="nav-text">My Profile</span></a>
+      <button class="nav-link" id="btnCitizenLogout" style="cursor: pointer; background: none; border: none; padding: 0;">
+        <i class="fa-solid fa-right-from-bracket"></i> <span class="nav-text">Sign Out</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main class="flex-grow max-w-[1440px] w-full mx-auto px-6 py-7">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <!-- BEGIN: LeftFormColumn -->
+    <section class="lg:col-span-8 bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200/90" data-purpose="incident-form-container">
+      <!-- Form Header -->
+      <div class="mb-6">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <div class="flex items-center space-x-2.5">
+            <span class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shadow-xs">
+              <svg class="w-5 h-5 -rotate-45 translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </span>
+            <div>
+              <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Submit Incident / Disaster Report</h1>
+            </div>
+          </div>
+          <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 pulse-dot"></span>
+            <span>Live Geofence Active</span>
+          </span>
+        </div>
+        <p class="text-xs text-slate-500 flex items-center space-x-1.5">
+          <svg class="w-3.5 h-3.5 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path clip-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" fill-rule="evenodd"></path>
+          </svg>
+          <span>Compliant with RA 10121 (DRRM Act) &amp; DILG Seal of Good Local Governance Protocols</span>
+        </p>
+      </div>
+
+      <!-- GPS Acquired Card -->
+      <div class="bg-[#f0fdf4] border border-emerald-200 rounded-xl p-3.5 sm:p-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs" data-purpose="gps-status-card">
+      <div class="flex items-center space-x-3">
+          <span class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center border border-emerald-200">
+            <span class="gps-dot" id="gpsDot"></span>
+          </span>
+          <div>
+            <div class="font-semibold text-emerald-800 text-sm" id="gpsStatusText">Acquiring live device GPS...</div>
+            <div class="text-xs text-slate-500" id="gpsCoords">Waiting for browser geolocation permission...</div>
+          </div>
+        </div>
+        <button type="button" id="btnRefreshGps" class="ml-auto px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition">
+          <i class="fa-solid fa-location-crosshairs mr-1"></i> Re-scan GPS
+        </button>
+      </div>
+
+      <!-- Incident Form Fields -->
+      <form id="incidentForm">
+
+        <!-- Location Selectors (Dropdown Drop-down) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5" data-purpose="location-selectors">
+          <div class="space-y-1.5">
+            <label class="block text-xs font-semibold text-slate-700" for="targetBarangay">Target Barangay <span class="text-red-500">*</span></label>
+            <div class="relative">
+              <select class="w-full text-xs sm:text-sm font-medium rounded-lg border-slate-200 shadow-2xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 py-2.5 px-3 bg-white text-slate-800 pr-8 cursor-pointer" id="targetBarangay" name="targetBarangay">
+                <option value="mambaling">Barangay Mambaling, Cebu City</option>
+                <option value="pardo">Barangay Pardo, Cebu City</option>
+                <option value="basak">Barangay Basak San Nicolas, Cebu City</option>
+                <option value="inayawan">Barangay Inayawan, Cebu City</option>
+                <option value="ermita">Barangay Ermita, Cebu City</option>
+                <option value="lahug">Barangay Lahug, Cebu City</option>
+              </select>
+            </div>
+          </div>
+          <div class="space-y-1.5">
+            <label class="block text-xs font-semibold text-slate-700" for="sitioPurok">Sitio / Purok <span class="text-red-500">*</span></label>
+            <div class="relative">
+              <select class="w-full text-xs sm:text-sm font-medium rounded-lg border-slate-200 shadow-2xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 py-2.5 px-3 bg-white text-slate-800 pr-8 cursor-pointer" id="sitioPurok" name="sitioPurok">
+                <option value="alaska">Sitio Alaska (VERY_HIGH Risk)</option>
+                <option value="kinalumsan">Sitio Kinalumsan (HIGH Risk)</option>
+                <option value="kawayan">Sitio Kawayan</option>
+                <option value="san-roque">Sitio San Roque</option>
+                <option value="naba">Sitio Naba</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Street / Landmark Description -->
+        <div class="mb-5">
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="streetLandmark">Street / Landmark Description</label>
+          <input class="w-full text-xs sm:text-sm rounded-lg border-slate-200 shadow-2xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 py-2.5 px-3 bg-white text-slate-800 placeholder-slate-400"
+                 id="streetLandmark" name="streetLandmark" type="text" placeholder="e.g. Corner of M. Parranda St. & Brgy. Road">
+        </div>
+
+        <!-- Reported Incident Category -->
+        <div class="mb-5">
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="reportTitle">
+            Reported Incident Category <span class="text-red-500">*</span>
+          </label>
+          <select id="reportTitle" class="w-full text-sm rounded-lg border-slate-200 shadow-2xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 py-2.5 px-3 bg-white text-slate-800 placeholder-slate-400 pr-8 cursor-pointer" required>
+            <option value="">Select incident category...</option>
+            <option value="lubak">Lubak / Flood / Bagyo</option>
+            <option value="kuryente">Downed Power Lines / Kuryente</option>
+            <option value="basura">Basura / Trash / Illegal Dumping</option>
+            <option value="kalsada">Kalamidad sa Kalsada / Road Damage</option>
+            <option value="apoy">Sunog / Fire / Apoy</option>
+            <option value="baha">Baha / Flooding</option>
+            <option value="puno">Fallen Tree / Puno sa kalsada</option>
+            <option value="tubig">Tubig / Water Main Break</option>
+            <option value="eleksyon">Election-related / Ligalig sa Eleksyon</option>
+            <option value="bomba">Suspicious Object / Bomba</option>
+            <option value="kawala">Other / Iba pa...</option>
+          </select>
+        </div>
+
+        <!-- Narrative Description -->
+        <div class="mb-5">
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="reportDesc">
+            Narrative Description <span class="text-red-500">*</span>
+          </label>
+          <textarea id="reportDesc" rows="3"
+                    class="w-full text-sm rounded-lg border-slate-200 shadow-2xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 py-2.5 px-3 bg-white text-slate-800 placeholder-slate-400 resize-y"
+                    placeholder="Ilarawan ang insidente. Halimbawa: 'Napakalalim ng lubak sa gitna ng daan delikado sa mga motorista...'" required></textarea>
+        </div>
+
+        <!-- Photo Upload with EXIF Preservation -->
+        <div class="mb-5">
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5">
+            Field Evidence Photo
+          </label>
+
+          <div class="border-2 border-dashed border-slate-200 rounded-xl p-5 text-center cursor-pointer transition-all"
+               id="dropzone" style="background: #f8fafc;">
+            <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+            <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-300 mb-2"></i>
+            <div class="text-sm font-medium text-slate-600 mb-1">Click to browse or drop photo here</div>
+            <div class="text-xs text-slate-400">JPEG or PNG (Preserves camera timestamp & GPS metadata)</div>
+            <div class="flex gap-2 justify-center mt-3">
+              <label for="fileInput" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
+                <i class="fa-solid fa-image mr-1"></i> Select from Gallery
+              </label>
+            </div>
+          </div>
+
+          <!-- Image Preview -->
+          <div class="image-preview-container mt-3" id="previewContainer" style="display: none;">
+            <div class="relative inline-block">
+              <img id="imagePreview" src="" alt="Incident Preview" class="w-32 h-32 object-cover rounded-lg border border-slate-200">
+              <span class="absolute -top-2 -right-2 bg-blue-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">
+                <i class="fa-solid fa-camera mr-0.5"></i> Ready for Analysis
+              </span>
+              <button type="button" id="btnRemoveImage" title="Remove Photo"
+                      class="absolute -bottom-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Citizen Optional Contact Information -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="citizenName">Pangalan (Optional)</label>
+            <input type="text" id="citizenName" class="w-full text-sm rounded-lg border-slate-200 shadow-2xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 py-2.5 px-3 bg-white text-slate-800 placeholder-slate-400"
+                   placeholder="Juan Dela Cruz">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5" for="citizenContact">Contact Email / Phone (Optional)</label>
+            <input type="text" id="citizenContact" class="w-full text-sm rounded-lg border-slate-200 shadow-2xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 py-2.5 px-3 bg-white text-slate-800 placeholder-slate-400"
+                   placeholder="0917-xxx-xxxx / email@ph">
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="btnSubmit"
+                class="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-medium text-sm transition-all shadow-md shadow-blue-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-paper-plane mr-2"></i>
+          Submit Incident to TUGON AI
+        </button>
+      </form>
+    </section>
+
+    <!-- BEGIN: RightSidebarColumn -->
+    <aside class="lg:col-span-4 space-y-6">
+      <!-- Top Card: Multimodal AI Triage (Dark) -->
+      <section class="bg-[#101b33] text-white rounded-2xl p-5 border border-slate-800 shadow-md">
+        <!-- Card Header -->
+        <div class="flex items-center justify-between pb-3.5 border-b border-slate-800/80 mb-4">
+          <div class="flex items-center space-x-2">
+            <span class="text-cyan-400">
+              <i class="fa-solid fa-brain text-lg"></i>
+            </span>
+            <h2 class="text-xs font-bold tracking-wider text-slate-100 uppercase">Live Multimodal AI Triage</h2>
+          </div>
+          <span class="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded bg-slate-800/90 text-slate-300 border border-slate-700" id="aiUrgencyBadge">
+            AWAITING INPUT
+          </span>
+        </div>
+
+        <!-- Prediction Box -->
+        <div class="bg-[#182645] rounded-xl p-3.5 border border-slate-700/60 mb-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-slate-300 font-medium">Predicted Sector:</span>
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-blue-600/20 border border-blue-500/30 text-blue-300 text-[10px] font-bold" id="aiPredictedSector">
+              •••
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed mb-3" id="aiSectorDesc">
+            Type description or upload photo to trigger instant multimodal analysis.
+          </p>
+          <!-- Progress Bar -->
+          <div>
+            <div class="flex justify-between items-center text-[11px] mb-1">
+              <span class="text-slate-400 font-medium">AI Confidence Score</span>
+              <span class="text-blue-400 font-mono font-bold" id="aiConfidenceText">0%</span>
+            </div>
+            <div class="w-full bg-[#0c1527] rounded-full h-1.5 overflow-hidden">
+              <div class="bg-blue-500 h-1.5 rounded-full transition-all duration-300 w-0" id="aiConfidenceBar"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cues & Checklist Area -->
+        <div class="space-y-3.5 text-xs">
+          <!-- NLP Lexicon Cues -->
+          <div>
+            <p class="text-[11px] font-bold text-slate-400 tracking-wider mb-1.5 uppercase">Detected NLP Lexicon Cues:</p>
+            <div id="aiKeywordTags">
+              <span class="inline-block px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800/80 text-slate-400 border border-slate-700">
+                none
+              </span>
+            </div>
+          </div>
+          <!-- Visual Cues -->
+          <div>
+            <p class="text-[11px] font-bold text-slate-400 tracking-wider mb-1 uppercase">Visual Feature Cues:</p>
+            <p class="text-slate-400 text-xs" id="aiVisualCues">No image loaded.</p>
+          </div>
+          <!-- Requirements Checklist -->
+          <div class="pt-2 border-t border-slate-800/80">
+            <div class="flex items-center space-x-1.5 text-blue-400 mb-1">
+              <i class="fa-solid fa-check-double"></i>
+              <h3 class="text-xs font-bold uppercase tracking-wider">Required Documents Checklist:</h3>
+            </div>
+            <ul id="aiRequirementsList" class="text-slate-400 text-xs pl-4 space-y-1">
+              <li>• Select or type report details to view office requirements...</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bottom Card: Photo EXIF GPS Inspector (White) -->
+      <section class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm">
+        <!-- Card Header -->
+        <div class="flex items-center space-x-2 pb-3.5 border-b border-slate-100 mb-4">
+          <span class="text-emerald-500">
+            <i class="fa-solid fa-fingerprint text-lg"></i>
+          </span>
+          <h2 class="text-xs sm:text-sm font-bold text-slate-800">Photo EXIF GPS Inspector</h2>
+        </div>
+        <!-- Metadata Key-Value List -->
+        <div class="space-y-2.5 text-xs mb-5">
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500">Camera Hardware:</span>
+            <strong id="exifCamera" class="text-slate-800">None detected</strong>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500">Original Timestamp:</span>
+            <strong id="exifTimestamp" class="text-slate-800">None</strong>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500">Embedded EXIF GPS:</span>
+            <strong id="exifCoordinates" class="text-blue-600 font-mono" style="font-family: monospace;">None</strong>
+          </div>
+          <div class="flex justify-between items-center pt-1 border-t border-slate-100">
+            <span class="text-slate-500">Verification Rule:</span>
+            <span class="text-slate-700 font-mono text-[11px]">Delta ≤ 200m or Privacy Fallback</span>
+          </div>
+        </div>
+        <!-- Anti-Fraud Geofencing Box -->
+        <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 text-xs flex items-start space-x-2.5">
+          <span class="text-blue-600 mt-0.5 flex-shrink-0">
+            <i class="fa-solid fa-shield-halved"></i>
+          </span>
+          <p class="text-slate-600 leading-relaxed text-[11px]">
+            <strong class="text-slate-800 font-semibold">Anti-Fraud Geofencing:</strong> Cross-references photo coordinates with the submitter's device location to prevent recycled or remote photo submissions.
+          </p>
+        </div>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<!-- Submission Result Modal -->
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden" id="resultModal">
+  <div class="bg-white rounded-2xl shadow-xl max-w-[600px] w-full mx-3 overflow-hidden">
+    <div class="flex items-center justify-between p-5 border-b border-slate-200 bg-blue-50">
+      <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+        <i class="fa-solid fa-circle-check text-emerald-500"></i>
+        Report Submitted &amp; Triaged
+      </h3>
+      <button class="text-slate-400 hover:text-slate-700 text-2xl" id="btnCloseModal">&times;</button>
+    </div>
+     <div class="p-5 overflow-y-auto max-h-[60vh]" id="modalResultContent">
+      <!-- Injected via JavaScript -->
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="mt-auto py-5 bg-white border-t border-slate-200 text-center">
+  <p class="text-xs text-slate-500 font-medium">
+    <span class="font-bold text-slate-700">TUGON AI</span> — Intelligent Municipal Incident Reporting &amp; Forensic Verification Platform. Capstone Research Project.
+  </p>
+</footer>
+
+<!-- Scripts -->
+<script>
+  // Auth gate
+  var citizenUser = localStorage.getItem('tugon_citizen_user');
+  var btnLogout = document.getElementById('btnCitizenLogout');
+  if (btnLogout) {
+    btnLogout.onclick = function() {
+      if (confirm('Sign out from your citizen account?')) {
+        localStorage.removeItem('tugon_citizen_user');
+        window.location.href = '/citizen/login';
+      }
+    };
+  }
+</script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>
